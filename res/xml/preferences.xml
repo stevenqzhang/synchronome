@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:robobunny="http://robobunny.com"
+    xmlns:example="http://schemas.android.com/apk/res/com.stevenzhang.android.metronome"
+    android:key="preference_screen">
+    <PreferenceCategory 
+        android:title="Vibrate"
+        android:key="vibrate">
+        
+        
+        <ListPreference 
+            android:key="beat_vibrate_length"
+            android:title="Beat Vibrate length"
+            android:summary="Define how long the on-beat vibration will be"
+            android:defaultValue="100" 
+            android:entries="@array/vibrateLength"
+            android:entryValues="@array/vibrateLengthValues"
+        />  
+            
+        
+        <ListPreference 
+            android:key="vibrate_length"
+            android:title="Vibrate length"
+            android:summary="Define how long the non-beat vibration will be"
+            android:defaultValue="50" 
+            android:entries="@array/vibrateLength"
+            android:entryValues="@array/vibrateLengthValues"
+        />  
+    </PreferenceCategory>
+    
+    <PreferenceCategory 
+        android:title="Sound"
+        android:key="sound">
+        
+        
+        <CheckBoxPreference 
+            android:key="click"
+            android:title="Clicking on"
+            android:summary="Define whether to click, else sine tones will be used"
+            android:defaultValue="false" 
+        />  
+            
+    </PreferenceCategory>
+    
+    <PreferenceCategory 
+        android:title="Synchronization"
+        android:key="synchronization">
+        
+        
+        <CheckBoxPreference 
+            android:key="sync_on"
+            android:title="Synchronize on"
+            android:summary="Synchronize metronome bpm with other metronomes"
+            android:defaultValue="false" 
+        />
+        
+        <CheckBoxPreference 
+            android:key="sync_start_on"
+            android:title="Synchronize start times"
+            android:summary="Whether to synchronize start times of the metronomes"
+            android:defaultValue="false" 
+            android:dependency="sync_on"
+        />  
+        
+        <EditTextPreference
+        	android:key="sync_session_id"
+            android:title="Session ID"
+            android:summary="Make sure all your metronomes you want to sync have the same session id"
+            android:defaultValue="31415"
+            android:dependency="sync_on"
+         />    
+         
+         <ListPreference 
+            android:key="sync_frequency"
+            android:title="Sync Frequency"
+            android:summary="Define how often to sync online (ms)"
+            android:defaultValue="1000" 
+            android:entries="@array/syncFrequencyValues"
+            android:entryValues="@array/syncFrequencyValues"
+        	android:dependency="sync_on"
+        	/>  
+         
+    </PreferenceCategory>
+    
+    <!-- I found it better to have the offsets/timings 
+    in the main apge. But maybe one day it'll be better store store in prefs...
+    
+    <PreferenceCategory 
+        android:title="Timings"
+        android:key="timings">
+        
+        <com.stevenzhang.android.metronome.SeekBarPreference
+        android:key="av_offset"
+	    android:title="@string/dialog_title"
+	    android:dialogTitle="@string/dialog_title"
+	    android:summary="@string/summary"
+	    android:persistent="true"
+	    android:defaultValue="80"
+	    example:minValue="0"
+	    example:maxValue="98" />
+        
+    </PreferenceCategory>    -->  
+    
+</PreferenceScreen>

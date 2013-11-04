@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    
+    <string-array name="vibrateLength">
+        <item name="0"> Vibrate off </item>
+        <item name="50"> 50 ms</item>
+        <item name="100"> 100 ms </item>
+        <item name="200"> 200 ms </item>
+        <item name="300"> 300 ms </item>
+    </string-array>
+    
+    <string-array name="vibrateLengthValues">
+        <item name="0"> 0 </item>
+        <item name="50"> 50</item>
+        <item name="100"> 100 </item>
+        <item name="200"> 200 </item>
+        <item name="300"> 300 </item>
+    </string-array>
+    
+    <string-array name="syncFrequencyValues">
+        <item name="100"> 100 </item>
+        <item name="200"> 200 </item>
+        <item name="500"> 500 </item>
+        <item name="1000"> 1000 </item>
+        <item name="2000"> 2000 </item>
+        <item name="5000"> 5000 </item>
+    </string-array>
+
+</resources>
