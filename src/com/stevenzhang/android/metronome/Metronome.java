@@ -98,7 +98,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	void calcNTPOffset() {
     	long time = getCurrentNetworkTime();
 		prefNTPOffset = time - System.currentTimeMillis();
-		logDebugAndToast("ntp", "PrefNTPOffset = " + prefNTPOffset);
+		logDebugAndToast("ntp", "NTP time offset = " + prefNTPOffset + " ms");
 	}
 	
 	//Conveninence method for logging, and sending a message via mdebugHandler
