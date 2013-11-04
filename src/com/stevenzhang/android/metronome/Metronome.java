@@ -50,7 +50,6 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	private int prefVibrateLength;
 	private int prefBeatVibrateLength;
 	public boolean prefClick = true;
-	public boolean prefSyncOn;
 	private boolean prefSyncStartOn;
 	
 	//variables for the complex caclulations
@@ -86,12 +85,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		prefBeatVibrateLength = Integer.parseInt(
 				mPrefs.getString("beat_vibrate_length", "100"));
 		prefClick = mPrefs.getBoolean("click", false);
-		prefSyncOn = mPrefs.getBoolean("sync_on", false);
 		
-		//make sure prefSyncStartOn is off in the right state
-		if(!prefSyncOn){
-			mPrefs.edit().putBoolean("sync_start_on", false);
-		}
 		prefSyncStartOn = mPrefs.getBoolean("sync_start_on", false);
 	}
 	
@@ -150,14 +144,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 			prefClick = prefs.getBoolean("click", true);
 			calcSilence();
     	} 
-		
-		//make sure sync_start_on is off if sync_on is false
-		//TODO remove? doesn't seem to do anything...
-		if (key.equals("sync_on")){
-			if(prefs.getBoolean(key, false)==false){
-				mPrefs.edit().putBoolean("sync_start_on", false);
-			}
-		}
+	
 	}
 	
 	public void calcSilence() {
@@ -324,7 +311,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	 * Output: plays a period of silence equivalent to 1-99% of the beat
 	 */
 	void playOffsetPercent(int offsetPercent){
-		mAudioGenerator.writeSoundDouble(Arrays.copyOfRange(
+		mAudioGenerator.writeSoundDouble(ArraysCompat.copyOfRange(
 				silenceSoundDouble, 0, offsetPercentToOffSet(offsetPercent)));
 	}
 	
@@ -337,7 +324,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	//Invalid playoffset errors would happen when the silence period is negative
 	void playOffset(int offset){
 		try{
-		mAudioGenerator.writeSoundDouble(Arrays.copyOfRange(
+		mAudioGenerator.writeSoundDouble(ArraysCompat.copyOfRange(
 				silenceSoundDouble, 0, offset));
 		}
 		catch(Exception e){

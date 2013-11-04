@@ -16,10 +16,6 @@ public class PreferencesActivity extends PreferenceActivity {
        
         
         addPreferencesFromResource(R.xml.preferences);
-        
-      //get a handle on preferences that require validation
-        EditTextPreference pref = (EditTextPreference)findPreference("sync_session_id");
-        pref.getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
     }
     
     @Override

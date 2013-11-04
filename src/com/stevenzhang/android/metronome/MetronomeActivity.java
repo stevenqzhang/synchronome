@@ -56,7 +56,6 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
 
 	private AudioManager audio;
     private MetronomeAsyncTask metroTask;
-    FetchParamsAsyncTask fetchTask;
     
     private Button plusButton;
     private Button minusButton;
@@ -111,10 +110,6 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
         
         setContentView(R.layout.main);
         metroTask = new MetronomeAsyncTask(this);
-        
-        if(mPrefs.getBoolean("sync_on", false)){
-        	fetchTask = new FetchParamsAsyncTask(this);
-        }      
         
         /* Set values and listeners to buttons and stuff */
         
@@ -177,25 +172,6 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences prefs,
 			String key) {
-    	
-    	
-
-		if (key.equals("sync_on")) {
-			//We must stop fetchTask if Sync is turned off.
-	    	//TODO  add a listener to if sync is turned on?
-			if(prefs.getBoolean("sync_on", false) == false){
-				if((fetchTask != null) && ///TODO make this a method of fetchTask
-	    				(fetchTask.getStatus() == AsyncTask.Status.RUNNING)){
-	    			fetchTask.stop();
-	    		}
-			}
-			
-			//make sure sync_start_on is off if sync_on is false
-			//FIXME doesn't seem to work, but oh well
-			if(prefs.getBoolean(key, false)==false){
-				mPrefs.edit().putBoolean("sync_start_on", false).commit();
-			}
-    	} 
 		
 		if (key.equals("av_offset")){ 
 			Log.d("Timings", key + ": "+ prefs.getInt(key, -1));
@@ -242,13 +218,8 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     		
     		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
     		{	metroTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
-    			if(mPrefs.getBoolean("sync_on", false))
-    				fetchTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
     		}else{
     			metroTask.execute();   
-    			
-    			if(mPrefs.getBoolean("sync_on", false))
-    				fetchTask.execute();  
     		}
     			
     	} else { //stop
@@ -256,12 +227,6 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     		
     		metroTask.stop();
     		metroTask = new MetronomeAsyncTask(this);
-    		
-    		if((fetchTask != null) &&
-    				(fetchTask.getStatus() == AsyncTask.Status.RUNNING)){
-    			fetchTask.stop();
-    		}
-    		fetchTask = new FetchParamsAsyncTask(this);
     		
     		Runtime.getRuntime().gc();
     	}
@@ -485,29 +450,6 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     
     //===============
 
-    
-    private Handler getFetchParamsHandler() {
-    	return new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-            	//TODO fix this using bundles
-            	String fetchedBpmString = ((String)msg.obj);
-            	try{
-            		Integer fetchedBpm = Integer.parseInt(fetchedBpmString);
-	            	if(!(fetchedBpm.shortValue() == bpm)){
-	            		//TODO do I need this toast? don't think so...
-//	            		Toast.makeText(getApplicationContext(), "BPM changed to " + fetchedBpmString, 
-//	            				Toast.LENGTH_SHORT).show();  
-	              	  	bpm = fetchedBpm.shortValue();
-	              	  	refreshBpm();
-	            	}
-            	} catch(Exception e){
-            		Log.e("fetchparams", e.toString());
-            	}
-            	
-            }
-        };
-    }
     private Handler getMetronomeDebugHandler() {
     	return new Handler() {
             @Override
@@ -521,119 +463,7 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
         };
     }
     
-    
-    //Syncing current bpm 
-    class FetchParamsAsyncTask extends AsyncTask<Void, String, Integer> {
-        boolean loop = true;
-        private Handler fetchHandler;
-        private Message msg;
-		private Context mContext;
-		private SharedPreferences prefs;
-        
-    	
-        public FetchParamsAsyncTask(Context context) {
-        	fetchHandler = getFetchParamsHandler();
-        	mContext = context;
-		}
-        
-        @Override 
-        protected void onProgressUpdate(String... values) {
-        	mToast.setText(values[0]);
-    		mToast.show();        
-        };
-        
-    	@Override
-        //todo change to more than bpm later
-        protected Integer doInBackground(Void... emptyParams) {
-        	do{
-        		if(Constants.DEV_MODE)
-	        		Log.d("fetchparams", "position 0");
-        		
-        		String uriString = Constants.SERVER_URL 
-        				+ mPrefs.getString("sync_session_id", "31415")
-	        			+".txt";
-	        	String line = null;
-	        	String[] params = new String[3];
-	        	
-	        	try{
-	        		if(Constants.DEV_MODE)
-		        		Log.d("fetchparams", "position 0b");
-	        		
-		        	URI uri = new URI(uriString);
-		        	HttpClient client = new DefaultHttpClient();
-		        	HttpGet request = new HttpGet(uri);
-		        	HttpResponse response = client.execute(request);
-		        	
-		        	if(Constants.DEV_MODE)
-		        		Log.d("fetchparams", "position 0c");
-
-		        	InputStream in = response.getEntity().getContent();
-		        	BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-		        	
-		        	if(Constants.DEV_MODE)
-		        		Log.d("fetchparams", "position 0d");
-		        	
-		        	int i = 0;
-		        	while((line = reader.readLine()) != null)
-		        	{
-		        		if(Constants.DEV_MODE)
-			        		Log.d("fetchparams", "position 0e");
-		        	    params[i] = line;
-		        	    i++;
-		        	}    	    	
-		        	in.close();
-		        	
-		        	if(Constants.DEV_MODE)
-		        		Log.d("fetchparams", "position 0f");
-		        	
-		        	if(Constants.DEV_MODE){
-		        		CharSequence text = "Params retrieved from " + Constants.SERVER_URL + " ";
-		        		Log.d("fetchparams", text.toString() + params[0]);
-		        	}
-	        	} catch (ArrayIndexOutOfBoundsException e){ //this means the sessiond Id is not good
-	        		Log.d("Fetchparams", "Bad session ID. Please set a valid session ID such as 31415: " 
-	        				+ e.toString());
-	        		//TODO int eh future, this will be filled with a text creation service?
-	        		mPrefs.edit()
-	        			.putString("sync_session_id", 
-	        					Integer.toString(Constants.DEFAULT_SESSION_ID))
-	        			.commit();
-	        		publishProgress("Bad session ID. Please set a valid session ID such as 31415: ");
-        		}catch(UnknownHostException e1){
-        			mPrefs.edit().putBoolean("sync_on", false)
-        			.commit();
-        			publishProgress("Unable to connect to server. Sync turned off");
-        		}catch (Exception e2){
-	        		Log.d("fetchparams", e2.toString());
-	        	}
-	        	
-	        	if(Constants.DEV_MODE)
-	        		Log.d("fetchparams", "position1");
-	        	
-	        	msg = Message.obtain();
-	        	msg.obj = params[0];
-	        	
-	        	if(Constants.DEV_MODE)
-	        		Log.d("fetchparams", "position2 ");
-	        	
-	        	fetchHandler.sendMessageDelayed(msg, Constants.FETCH_FREQUENCY);
-	        	//TODO make this work. low priority. some weir dnullpointerexception
-//	        	fetchHandler.sendMessageDelayed(msg, 
-//	        			Integer.getInteger(prefs.getString("sync_frequency", "1000")));
-	        	
-	        	
-	        	if(Constants.DEV_MODE)
-	        		Log.d("fetchparams", "position3 ");
-        	}while(loop);
-
-        	return null;
-        }
-
-    	void stop(){
-    		loop = false;
-    	}
-    }
-    
+      
     //Metronome background task
     class MetronomeAsyncTask extends AsyncTask<Void, Void,  String> 
     {	public Metronome metronome;

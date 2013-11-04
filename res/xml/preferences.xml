@@ -47,44 +47,19 @@
         android:title="Synchronization"
         android:key="synchronization">
         
-        
-        <CheckBoxPreference 
-            android:key="sync_on"
-            android:title="Synchronize on"
-            android:summary="Synchronize metronome bpm with other metronomes"
-            android:defaultValue="false" 
-        />
-        
         <CheckBoxPreference 
             android:key="sync_start_on"
             android:title="Synchronize start times"
             android:summary="Whether to synchronize start times of the metronomes"
             android:defaultValue="false" 
-            android:dependency="sync_on"
         />  
         
-        <EditTextPreference
-        	android:key="sync_session_id"
-            android:title="Session ID"
-            android:summary="Make sure all your metronomes you want to sync have the same session id"
-            android:defaultValue="31415"
-            android:dependency="sync_on"
-         />    
-         
-         <ListPreference 
-            android:key="sync_frequency"
-            android:title="Sync Frequency"
-            android:summary="Define how often to sync online (ms)"
-            android:defaultValue="1000" 
-            android:entries="@array/syncFrequencyValues"
-            android:entryValues="@array/syncFrequencyValues"
-        	android:dependency="sync_on"
-        	/>  
-         
     </PreferenceCategory>
     
     <!-- I found it better to have the offsets/timings 
     in the main apge. But maybe one day it'll be better store store in prefs...
+    
+    Here's how I would do it if so.
     
     <PreferenceCategory 
         android:title="Timings"

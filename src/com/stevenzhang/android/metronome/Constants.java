@@ -24,22 +24,6 @@ public final class Constants {
 	public static final int BEAT_VIBRATE_LENGTH = 100; //200 is long, 100 can still be felt
 	public static final int SAMPLE_RATE = 8000;
 	
-	//====FETCHING STUFF
-	public static final boolean FETCH_PARAMS_ON = true; //whether to have fetch params mode or not
-	
-	/*
-	 * Frequency of fetching from server
-	 * 
-	 * Acceptable ranges:
-	 * 
-	 * Date		type of server		phone		VALUE			+,-		comments
-	 * 131016 	local				xiaomi		100, 200		+		works fine, no lag perceived.
-	 * 131016 	local				g2			100				+ 		no problem
-	 * 131016	local				g2			100				+		no problem
-	 * 131017 	freehostia			g2/xiaomi	500				-		changing a few times makes it bad
-	 */
-	public static final long FETCH_FREQUENCY = 1000;
-	
 	//====SYNCING STUFF===
 	public static final boolean SYNC_START_ON = true; //if true, then will sync starts of beats with global time
 	
@@ -64,12 +48,6 @@ public final class Constants {
 	
 	public static final int BEAT_SOUND_FREQ = 2440;
 	public static final int NONBEAT_SOUND_FREQ = 6440;
-	
-	public static final String SERVER_URL = "http://gcstudent.stevenzhang.com/metronome/";
-
-
-	public static final int DEFAULT_SESSION_ID = 31415;
-
 
 	public static final boolean FLUSH_PREFERENCES = false;
 	
