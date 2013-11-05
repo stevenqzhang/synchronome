@@ -502,7 +502,7 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
 			metronome.setBeat(beats);
 			metronome.setNoteValue(noteValue);
 			metronome.setBpm(bpm);
-			metronome.calcNTPOffset();
+			metronome.calcNTPOffsetHelper();
 			metronome.play();
 			
 			return null;			

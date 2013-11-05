@@ -89,9 +89,14 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		prefSyncStartOn = mPrefs.getBoolean("sync_start_on", false);
 	}
 	
-	void calcNTPOffset() {
+	synchronized long calcNTPOffset() {
     	long time = getCurrentNetworkTime();
-		prefNTPOffset = time - System.currentTimeMillis();
+		long offset = time - System.currentTimeMillis();
+		return offset;
+	}
+
+	void calcNTPOffsetHelper(){
+		prefNTPOffset = calcNTPOffset();
 		logDebugAndToast("ntp", "NTP time offset = " + prefNTPOffset + " ms");
 	}
 	
@@ -103,7 +108,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		mDebugHandler.sendMessage(msg);
 	}
     
-    public long getCurrentNetworkTime(){
+	synchronized public long getCurrentNetworkTime(){
 	    NTPUDPClient timeClient = new NTPUDPClient();
 	    
 	    TimeInfo timeInfo = null;
@@ -209,14 +214,17 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 				currentBeat = 1;
 
 				//TODO use nanos?
+				long time1NTP;
 				
+				//This segment is synchronized- calculating the current time is most important
+				synchronized(this){
 				long time0 = System.currentTimeMillis();
 				long time0NTP = time0 + prefNTPOffset;
 				
 				//start at time 1
-				long time1NTP = roundLong(time0NTP) + Constants.SYNC_WAIT_TIME; 
+					time1NTP = roundLong(time0NTP) + Constants.SYNC_WAIT_TIME; 
 				time1 = time1NTP - prefNTPOffset;
-				
+				}
 				//false for now since I think it might take up extra time
 				if(true){
 					Date date = new Date(time1NTP);
