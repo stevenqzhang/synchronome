@@ -449,7 +449,8 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     }
     
     
-    //lots of errors when pressing home button with metronome on
+/*  
+     //lots of errors when pressing home button with metronome on
     //better to just quit when another activity comes to foreground
     @Override
     public void onPause(){
@@ -459,8 +460,12 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
 				AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
 		
 		super.onPause();
-		finish();    
+		
+		//TODO: not very user friendlyt o have this everytime they press back. change this somehow...
+		finish();
     }
+    */
+    
     
     //===============
 

@@ -117,6 +117,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	    	timeInfo = timeClient.getTime(inetAddress);
 	    }catch(Exception e){
 	    	Log.e("ntp", e.toString());
+	    	logDebugAndToast("ntp", "unable to connect to NTP server. Please turn off sync start");
 	    }
 	    //long returnTime = timeInfo.getReturnTime();   //local device time
 	    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();   //server time
