@@ -444,7 +444,21 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     	Runtime.getRuntime().gc();
 		audio.setStreamVolume(AudioManager.STREAM_MUSIC, initialVolume, 
 				AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
-    	//TODO registerOnSharedPreferenceChangeListener
+    	//TODO registerOnSharedPreferen131105ceChangeListener
+		finish();    
+    }
+    
+    
+    //lots of errors when pressing home button with metronome on
+    //better to just quit when another activity comes to foreground
+    @Override
+    public void onPause(){
+    	metroTask.stop();
+    	Runtime.getRuntime().gc();
+		audio.setStreamVolume(AudioManager.STREAM_MUSIC, initialVolume, 
+				AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+		
+		super.onPause();
 		finish();    
     }
     
