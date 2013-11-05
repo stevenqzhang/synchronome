@@ -196,6 +196,9 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	
 
 	public void play() {
+		if(syncStartFlag){
+			calcNTPOffsetHelper();
+		}
 		calcSilence();
 		
 
@@ -258,8 +261,10 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 					Log.d("ntp", "in loop");
 				}
 				syncStartFlag = false;
-				logDebugAndToast("ntp", "actual-desired start time = "+ (now - time1) +"ms");
-				//Log.d("ntp", "actual-desired start time = "+ (now - time1));
+				
+				//This seems to have an effect on the playing
+				//logDebugAndToast("ntp", "actual-desired start time = "+ (now - time1) +"ms");
+				Log.d("ntp", "actual-desired start time = "+ (now - time1));
 			}
 			
 			

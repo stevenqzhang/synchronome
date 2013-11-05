@@ -33,9 +33,9 @@ public final class Constants {
 	 * 131016 	local				xiaomi		500				0		too low.
 	 */
 	
-	public static final double SYNC_ROUNDING_VALUE = 2000; //round to neares ___ in ms
+	public static final double SYNC_ROUNDING_VALUE = 5000; //round to neares ___ in ms
 	//time to wait after that, should be the same as above
-	public static final long SYNC_WAIT_TIME = 2000; 
+	public static final long SYNC_WAIT_TIME = 5000; 
 //	public enum SoundTypeChoices{
 //		CLICK, SINE
 //	};
