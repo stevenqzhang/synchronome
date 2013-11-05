@@ -60,6 +60,7 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
 
 	private AudioManager audio;
     private MetronomeAsyncTask metroTask;
+    private FetchNTPAsyncTask fetchTask;
     
     private Button plusButton;
     private Button minusButton;
@@ -94,7 +95,7 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     }
 	
     /** Called when the activity is first created. */
-   @SuppressLint("ShowToast")
+    @SuppressLint("ShowToast")
 	//todo refactor into seperate things?
     @Override
     public void onCreate(Bundle savedInstanceState) {    	
@@ -112,9 +113,13 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
         	e.commit();
         }
         
+        
+        
         setContentView(R.layout.main);
         metroTask = new MetronomeAsyncTask(this);
-        
+        fetchNTPTime();
+              
+
         /* Set values and listeners to buttons and stuff */
         
         TextView bpmText = (TextView) findViewById(R.id.bps);
@@ -170,6 +175,19 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
         startOffsetBar.setMax(98); //todo retrieve this from preferences?
         startOffsetBar.setOnSeekBarChangeListener(startOffsetListener);
     }
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void fetchNTPTime() {
+		if(mPrefs.getBoolean("sync_start_on", false)){
+        	fetchTask = new FetchNTPAsyncTask(this);
+        	
+        	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+    		{	fetchTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[])null);
+    		}else{
+    			fetchTask.execute();  
+    		}
+        }
+	}
     
     
 
@@ -467,65 +485,75 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
         };
     }
     
+    
+    class FetchNTPAsyncTask extends AsyncTask<Void, Void, Long>{
+    	
+    	
+    	public FetchNTPAsyncTask(MetronomeActivity metronomeActivity) {
+			
+		}
+
+		@Override
+		protected Long doInBackground(Void... arg0) {
+			long time = getCurrentNetworkTime();
+    		long offset = time - System.currentTimeMillis();
+    		return offset;
+
+		}
+		
+		@Override
+		protected void onPostExecute(Long offset){		
+			metroTask.setNTPOffset(offset);
+			
+			CharSequence text = "NTP time offset = " + offset + " ms";
+			Log.d("ntp", text.toString());
+    		mToast.setText(text);
+    		mToast.show();     
+			
+		}
+    	
+
+		public long getCurrentNetworkTime(){
+		    NTPUDPClient timeClient = new NTPUDPClient();
+		    
+		    TimeInfo timeInfo = null;
+		    try{
+		    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
+		    	timeInfo = timeClient.getTime(inetAddress);
+		    }catch(Exception e){
+		    	Log.e("ntp", e.toString());
+		    }
+		    //long returnTime = timeInfo.getReturnTime();   //local device time
+		    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();   //server time
+		    timeInfo.getMessage().getTransmitTimeStamp().getTime();
+		    Date time = new Date(returnTime);
+		    
+		    //TODO make this into a debug mode/verbose?
+		    if(true){
+	    		CharSequence text = "Time from " + Constants.TIME_SERVER + ": " + time + 
+	    				timeInfo.getMessage().getTransmitTimeStamp().toDateString();
+	    		Log.d("ntp", text.toString());
+	    	}
+		    
+		    return returnTime;
+		}
+
+    }
       
     //Metronome background task
     //Android API says AsyncTask should only be used for short operations, may need to change this to FutureTask
     //TODO "If you need to keep threads running for long periods of time, it is highly recommended you use the various APIs provided by the java.util.concurrent pacakge such as Executor, ThreadPoolExecutor and FutureTask."
     class MetronomeAsyncTask extends AsyncTask<Void, Void,  String> 
     {	public Metronome metronome;
-	private long prefNTPOffset;
-	private Message msg;
+		private Message msg;
     	
     	MetronomeAsyncTask(Context context) {
             mMetronomeBeatHandler = getMetronomeBeatHandler();
             mMetronomeDebugHandler = getMetronomeDebugHandler();
             
-            //TODO if statement here
-            calcNTPOffset();
-            
-    		metronome = new Metronome(mMetronomeBeatHandler, mMetronomeDebugHandler, context, prefNTPOffset);
+    		metronome = new Metronome(mMetronomeBeatHandler, mMetronomeDebugHandler, context);
     	}
     	
-    	
-    	void calcNTPOffset() {
-        	long time = getCurrentNetworkTime();
-    		prefNTPOffset = time - System.currentTimeMillis();
-    		Log.d("ntp", "NTP time offset = " + prefNTPOffset + " ms");
-    	}
-    	
-    	public long getCurrentNetworkTime(){
-    	    NTPUDPClient timeClient = new NTPUDPClient();
-    	    
-    	    TimeInfo timeInfo = null;
-    	    try{
-    	    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
-    	    	timeInfo = timeClient.getTime(inetAddress);
-    	    }catch(Exception e){
-    	    	Log.e("ntp", e.toString());
-    	    }
-    	    //long returnTime = timeInfo.getReturnTime();   //local device time
-    	    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();   //server time
-    	    timeInfo.getMessage().getTransmitTimeStamp().getTime();
-    	    Date time = new Date(returnTime);
-    	    
-    	    //TODO make this into a debug mode/verbose?
-    	    if(true){
-        		CharSequence text = "Time from " + Constants.TIME_SERVER + ": " + time + 
-        				timeInfo.getMessage().getTransmitTimeStamp().toDateString();
-        		logDebugAndToast("ntp", text.toString());
-        	}
-    	    
-    	    return returnTime;
-    	}
-    	
-    	//Conveninence method for logging, and sending a message via mdebugHandler
-    	void logDebugAndToast(String tag, CharSequence text){
-    		Log.d(tag, text.toString());
-    		msg = Message.obtain();
-    		msg.obj = ""+text;
-    		mMetronomeDebugHandler.sendMessage(msg);
-    	}
-
 		public void mute() {
 			if(metronome != null)
 				metronome.prefMute = true;
@@ -561,6 +589,11 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
 		public void setBeat(short beat) {
 			if(metronome != null)
 				metronome.setBeat(beat);
+		}
+		
+		public void setNTPOffset(long offset){
+			if(metronome != null)
+				metronome.prefNTPOffset = offset;
 		}
     }
 

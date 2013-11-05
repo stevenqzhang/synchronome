@@ -63,16 +63,15 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	int va2;
 	int s0;
 	public boolean prefMute = false;
-	private long prefNTPOffset;
+	public long prefNTPOffset;
 	
 	
-	public Metronome(Handler handler, Handler debugHandler, Context context, long offset) {
+	public Metronome(Handler handler, Handler debugHandler, Context context) {
 		mAudioGenerator.createPlayer();
 		this.mDebugHandler = debugHandler;
 		this.mHandler = handler;
 		this.mContext = context;
 		this.mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
-		this.prefNTPOffset = offset;
 		
 		//Setup prefs
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
