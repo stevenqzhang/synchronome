@@ -105,16 +105,24 @@ public class Metronome implements OnSharedPreferenceChangeListener{
     
     public long getCurrentNetworkTime(){
 	    NTPUDPClient timeClient = new NTPUDPClient();
-	    
+	    long timeSum = 0L;
 	    TimeInfo timeInfo = null;
-	    try{
-	    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
-	    	timeInfo = timeClient.getTime(inetAddress);
-	    }catch(Exception e){
-	    	Log.e("ntp", e.toString());
+	    
+	    for (int i=0; i<5; i++){
+		    try{
+		    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
+		    	timeInfo = timeClient.getTime(inetAddress);
+		    	timeSum+= timeInfo.getMessage().getTransmitTimeStamp().getTime();
+		    	Log.d("ntp", "timesum = "+ timeSum);
+			    //long returnTime = timeInfo.getReturnTime();   //local device time	  
+		    }catch(Exception e){
+		    	Log.e("ntp", e.toString());
+		    
+		    }
 	    }
-	    //long returnTime = timeInfo.getReturnTime();   //local device time
-	    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();   //server time
+	    
+	    
+	    long returnTime = timeSum/5;   //server time
 	    timeInfo.getMessage().getTransmitTimeStamp().getTime();
 	    Date time = new Date(returnTime);
 	    
