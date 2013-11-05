@@ -444,7 +444,7 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     	Runtime.getRuntime().gc();
 		audio.setStreamVolume(AudioManager.STREAM_MUSIC, initialVolume, 
 				AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
-    	//TODO registerOnSharedPreferen131105ceChangeListener
+    	//TODO registerOnSharedPreferenceChangeListener
 		finish();    
     }
     

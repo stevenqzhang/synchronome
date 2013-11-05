@@ -33,7 +33,7 @@ public final class Constants {
 	 * 131016 	local				xiaomi		500				0		too low.
 	 */
 	
-	public static final double SYNC_ROUNDING_VALUE = 5000; //round to neares ___ in ms
+	public static final double SYNC_ROUNDING_VALUE = 2000; //round to neares ___ in ms
 	//time to wait after that, should be the same as above
 	public static final long SYNC_WAIT_TIME = 2000; 
 //	public enum SoundTypeChoices{
@@ -49,10 +49,12 @@ public final class Constants {
 	public static final boolean FLUSH_PREFERENCES = false;
 	
 	
-	//pool.ntp.org would be ideal to avoid busy servers, but we need to pick the SAME server.
-	public static final String TIME_SERVER = "wwv.nist.gov";
+	//this one works best for me, but I probably just live near the server
+	public static final String TIME_SERVER = "nist1-chi.ustiming.org";
 	
-	//public static final String TIME_SERVER = "nist1-chi.ustiming.org";
+	
+	//pool.ntp.org would be ideal to avoid busy servers, but we need to pick the SAME server.
+	//public static final String TIME_SERVER = "wwv.nist.gov";
 	//public static final String TIME_SERVER = "time-d.nist.gov";
 	//public static final String TIME_SERVER = "nisttime.carsoncity.k12.mi.us";
 	

@@ -249,8 +249,9 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 					now = System.currentTimeMillis();
 					Log.d("ntp", "in loop");
 				}
-			
 				syncStartFlag = false;
+				logDebugAndToast("ntp", "actual-desired start time = "+ (now - time1) +"ms");
+				//Log.d("ntp", "actual-desired start time = "+ (now - time1));
 			}
 			
 			
