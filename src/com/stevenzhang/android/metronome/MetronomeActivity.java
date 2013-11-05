@@ -3,9 +3,13 @@ package com.stevenzhang.android.metronome;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.Date;
 
+import org.apache.commons.net.ntp.NTPUDPClient;
+import org.apache.commons.net.ntp.TimeInfo;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -465,13 +469,61 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
     
       
     //Metronome background task
+    //Android API says AsyncTask should only be used for short operations, may need to change this to FutureTask
+    //TODO "If you need to keep threads running for long periods of time, it is highly recommended you use the various APIs provided by the java.util.concurrent pacakge such as Executor, ThreadPoolExecutor and FutureTask."
     class MetronomeAsyncTask extends AsyncTask<Void, Void,  String> 
     {	public Metronome metronome;
+	private long prefNTPOffset;
+	private Message msg;
     	
     	MetronomeAsyncTask(Context context) {
             mMetronomeBeatHandler = getMetronomeBeatHandler();
             mMetronomeDebugHandler = getMetronomeDebugHandler();
-    		metronome = new Metronome(mMetronomeBeatHandler, mMetronomeDebugHandler, context);
+            
+            //TODO if statement here
+            calcNTPOffset();
+            
+    		metronome = new Metronome(mMetronomeBeatHandler, mMetronomeDebugHandler, context, prefNTPOffset);
+    	}
+    	
+    	
+    	void calcNTPOffset() {
+        	long time = getCurrentNetworkTime();
+    		prefNTPOffset = time - System.currentTimeMillis();
+    		Log.d("ntp", "NTP time offset = " + prefNTPOffset + " ms");
+    	}
+    	
+    	public long getCurrentNetworkTime(){
+    	    NTPUDPClient timeClient = new NTPUDPClient();
+    	    
+    	    TimeInfo timeInfo = null;
+    	    try{
+    	    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
+    	    	timeInfo = timeClient.getTime(inetAddress);
+    	    }catch(Exception e){
+    	    	Log.e("ntp", e.toString());
+    	    }
+    	    //long returnTime = timeInfo.getReturnTime();   //local device time
+    	    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();   //server time
+    	    timeInfo.getMessage().getTransmitTimeStamp().getTime();
+    	    Date time = new Date(returnTime);
+    	    
+    	    //TODO make this into a debug mode/verbose?
+    	    if(true){
+        		CharSequence text = "Time from " + Constants.TIME_SERVER + ": " + time + 
+        				timeInfo.getMessage().getTransmitTimeStamp().toDateString();
+        		logDebugAndToast("ntp", text.toString());
+        	}
+    	    
+    	    return returnTime;
+    	}
+    	
+    	//Conveninence method for logging, and sending a message via mdebugHandler
+    	void logDebugAndToast(String tag, CharSequence text){
+    		Log.d(tag, text.toString());
+    		msg = Message.obtain();
+    		msg.obj = ""+text;
+    		mMetronomeDebugHandler.sendMessage(msg);
     	}
 
 		public void mute() {
@@ -488,7 +540,6 @@ public class MetronomeActivity extends Activity implements OnSharedPreferenceCha
 			metronome.setBeat(beats);
 			metronome.setNoteValue(noteValue);
 			metronome.setBpm(bpm);
-			metronome.calcNTPOffset();
 			metronome.play();
 			
 			return null;			

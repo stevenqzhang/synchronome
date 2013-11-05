@@ -66,12 +66,13 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	private long prefNTPOffset;
 	
 	
-	public Metronome(Handler handler, Handler debugHandler, Context context) {
+	public Metronome(Handler handler, Handler debugHandler, Context context, long offset) {
 		mAudioGenerator.createPlayer();
 		this.mDebugHandler = debugHandler;
 		this.mHandler = handler;
 		this.mContext = context;
 		this.mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+		this.prefNTPOffset = offset;
 		
 		//Setup prefs
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -89,11 +90,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		prefSyncStartOn = mPrefs.getBoolean("sync_start_on", false);
 	}
 	
-	void calcNTPOffset() {
-    	long time = getCurrentNetworkTime();
-		prefNTPOffset = time - System.currentTimeMillis();
-		logDebugAndToast("ntp", "NTP time offset = " + prefNTPOffset + " ms");
-	}
+	
 	
 	//Conveninence method for logging, and sending a message via mdebugHandler
 	void logDebugAndToast(String tag, CharSequence text){
@@ -103,30 +100,7 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		mDebugHandler.sendMessage(msg);
 	}
     
-    public long getCurrentNetworkTime(){
-	    NTPUDPClient timeClient = new NTPUDPClient();
-	    
-	    TimeInfo timeInfo = null;
-	    try{
-	    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
-	    	timeInfo = timeClient.getTime(inetAddress);
-	    }catch(Exception e){
-	    	Log.e("ntp", e.toString());
-	    }
-	    //long returnTime = timeInfo.getReturnTime();   //local device time
-	    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();   //server time
-	    timeInfo.getMessage().getTransmitTimeStamp().getTime();
-	    Date time = new Date(returnTime);
-	    
-	    //TODO make this into a debug mode/verbose?
-	    if(true){
-    		CharSequence text = "Time from " + Constants.TIME_SERVER + ": " + time + 
-    				timeInfo.getMessage().getTransmitTimeStamp().toDateString();
-    		Log.d("ntp", text.toString());
-    	}
-	    
-	    return returnTime;
-	}
+    
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences prefs,
