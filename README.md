@@ -11,7 +11,9 @@ A synchronized tactile metronome for Android.
 
 
 # How to use
-(screenshots will come someday)
+
+## Install app
+Install the apk found in bin/synchronome.apk, or build it yourself (I used ADT/eclipse, probably affects the folder strcuture...)
 
 ## Startup
 
