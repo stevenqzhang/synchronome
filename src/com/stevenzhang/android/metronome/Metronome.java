@@ -87,6 +87,8 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		prefClick = mPrefs.getBoolean("click", false);
 		
 		prefSyncStartOn = mPrefs.getBoolean("sync_start_on", false);
+		syncStartFlag = prefSyncStartOn;
+		
 	}
 	
 	synchronized long calcNTPOffset() {
@@ -147,8 +149,12 @@ public class Metronome implements OnSharedPreferenceChangeListener{
     		+ prefBeatVibrateLength);
     	} 
 		if (key.equals("click")) {
-			prefClick = prefs.getBoolean("click", true);
+			prefClick = prefs.getBoolean(key, true);
 			calcSilence();
+    	} 
+		if (key.equals("start_sync_on")) {
+			prefSyncStartOn = prefs.getBoolean(key, true);
+			syncStartFlag = prefSyncStartOn;
     	} 
 	
 	}
