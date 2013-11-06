@@ -23,8 +23,10 @@ Install the apk found in bin/synchronome.apk, or build it yourself (I used ADT/e
 3. To sync the metronome between multiple phone:
 	1. Make sure you're connected to the internet.
 	2. Set the BPM on both phones to be the same.
-	3. Press "start" on the phones within ~1second of each other
+	3. Press "start" on the phones within ~2second of each other, but DON'T press them at the same time. Try to space it out. Otherwise you might not get accurate NTP time on both phones.
 		* _You'll see a message popup with  the NTP time offset. This is merely informative and shows the difference between your phone's system time and NTP time. NTP time is used to sync the phones._
+	4. The first time you run it for a given BPM and phone combination, you might have to adjust the offset sliders (see below) to make them sync
+	5. _If you're consistently getting bad sync results, you can always use the metronomes with sync off, and manually adjust the offset sliders. Wait until I make a better version :)_
 
 4. If you want to stop the metronome, but don't need to change the BPM, use the Mute button. That way multiple metronomes will be kept in sync.
 
@@ -41,7 +43,9 @@ Two sliders are provided to manually compensate for these problems:
 1. __A/V offset__. Use this to minimize the delay between audio and visual+tactile.
 2. __Start offset__. Adjust this if your multiple phones are slightly off even while syncing with NTP. (see below)
 
-* Time is synced using NTP. I use the [org.apache.commons.net.ntp](commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ntp/package-summary.html) package
+
+
+Time is synced using NTP. I use the [org.apache.commons.net.ntp](commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ntp/package-summary.html) package
 
 # Known issues
 
