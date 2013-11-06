@@ -91,15 +91,21 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		
 	}
 	
-	synchronized long calcNTPOffset() {
+	synchronized long calcNTPOffset() throws IOException {
     	long time = getCurrentNetworkTime();
 		long offset = time - System.currentTimeMillis();
 		return offset;
 	}
 
 	void calcNTPOffsetHelper(){
-		prefNTPOffset = calcNTPOffset();
-		logDebugAndToast("ntp", "NTP time offset = " + prefNTPOffset + " ms");
+		try{
+			prefNTPOffset = calcNTPOffset();
+			logDebugAndToast("ntp", "NTP time offset = " + prefNTPOffset + " ms");
+		}catch(Exception e){
+	    	Log.e("ntp", e.toString());
+	    	logDebugAndToast("ntp", "Unable to connect to NTP server. Please turn off sync start");
+	    	syncStartFlag = false;
+	    }
 	}
 	
 	//Conveninence method for logging, and sending a message via mdebugHandler
@@ -110,17 +116,14 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 		mDebugHandler.sendMessage(msg);
 	}
     
-	synchronized public long getCurrentNetworkTime(){
+	synchronized public long getCurrentNetworkTime() throws IOException{
 	    NTPUDPClient timeClient = new NTPUDPClient();
 	    
 	    TimeInfo timeInfo = null;
-	    try{
-	    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
-	    	timeInfo = timeClient.getTime(inetAddress);
-	    }catch(Exception e){
-	    	Log.e("ntp", e.toString());
-	    	logDebugAndToast("ntp", "unable to connect to NTP server. Please turn off sync start");
-	    }
+	    
+    	InetAddress inetAddress = InetAddress.getByName(Constants.TIME_SERVER);
+    	timeInfo = timeClient.getTime(inetAddress);
+	    
 	    //long returnTime = timeInfo.getReturnTime();   //local device time
 	    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();   //server time
 	    timeInfo.getMessage().getTransmitTimeStamp().getTime();
@@ -160,9 +163,6 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	}
 	
 	public void calcSilence() {
-		if(prefSyncStartOn){
-			syncStartFlag = true;
-		}
 		tickSoundByte = new byte[this.numTickSamples];
 		tockSoundByte = new byte[this.numTickSamples];
 		silentTickSoundDouble = new double[this.numTickSamples];
@@ -203,11 +203,11 @@ public class Metronome implements OnSharedPreferenceChangeListener{
 	
 
 	public void play() {
+		calcSilence();
+		
 		if(syncStartFlag){
 			calcNTPOffsetHelper();
 		}
-		calcSilence();
-		
 
 		do {
 			long time1 = 0L;
